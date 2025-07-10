@@ -4,12 +4,77 @@
   <meta charset="UTF-8">
   <title>Гра: Назви фрукт або овоч</title>
   <style>
-  <body>
+    body {
+      font-family: 'Comic Sans MS', sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(to bottom right, #e0ffe0, #fff0f5);
+      color: #333;
+    }
+    img {
+      width: 200px;
+      height: auto;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    button {
+      padding: 10px 25px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      font-size: 22px;
+      margin-top: 15px;
+    }
+    #basket {
+      margin-top: 20px;
+      font-size: 24px;
+      color: green;
+    }
+    #basketSVG {
+      margin-top: 10px;
+      transition: transform 0.3s ease-in-out;
+    }
+    /* Стилі для стартового екрану */
+    #startScreen {
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(120deg,#fffbe7,#e0ffe0 90%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #startButton {
+      font-size: 2rem;
+      padding: 20px 50px;
+      background: #ffb700;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      box-shadow: 0 0 24px #d2ac36;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
   <!-- Стартова заставка -->
-  <div id="startScreen" style="position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(120deg,#fffbe7,#e0ffe0 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div id="startScreen">
     <h2 style="font-size:2.5rem;color:#4caf50;margin-bottom:32px;">Натисни, щоб почати гру з музикою!</h2>
-    <button id="startButton" style="font-size:2rem;padding:20px 50px;background:#ffb700;color:#fff;border:none;border-radius:25px;box-shadow:0 0 24px #d2ac36;cursor:pointer;">▶️ Старт</button>
-    <div style="margin-top:20px;font-size:1.1rem;color:#666;">Після цього натискай “Говорити” і грай як завжди.</div>
+    <button id="startButton">▶️ Старт</button>
+    <div style="margin-top:20px;font-size:1.1rem;color:#666;">
+      Після цього натискай “Говорити” і грай як завжди.
+    </div>
   </div>
 
   <h1>Назви фрукт або овоч голосом</h1>
@@ -127,7 +192,7 @@
       };
     }
 
-    // Новий код: запуск музики тільки після натискання “Старт”
+    // Запуск гри після натискання “Старт”
     document.getElementById("startButton").onclick = function() {
       document.getElementById("startScreen").style.display = "none";
       backgroundMusic.play();
@@ -138,5 +203,4 @@
     // showFruit() викликаємо тільки після старту (див. вище)
   </script>
 </body>
-
 </html>
