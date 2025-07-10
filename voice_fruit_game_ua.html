@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Гра: Назви фрукт або овоч</title>
+  <style>
+  <body>
+  <!-- Стартова заставка -->
+  <div id="startScreen" style="position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(120deg,#fffbe7,#e0ffe0 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <h2 style="font-size:2.5rem;color:#4caf50;margin-bottom:32px;">Натисни, щоб почати гру з музикою!</h2>
+    <button id="startButton" style="font-size:2rem;padding:20px 50px;background:#ffb700;color:#fff;border:none;border-radius:25px;box-shadow:0 0 24px #d2ac36;cursor:pointer;">▶️ Старт</button>
+    <div style="margin-top:20px;font-size:1.1rem;color:#666;">Після цього натискай “Говорити” і грай як завжди.</div>
+  </div>
+
+  <h1>Назви фрукт або овоч голосом</h1>
+  <p>Що це за фрукт або овоч?</p>
+  <img id="fruitImage" src="" alt="Фрукт або овоч">
+  <br>
+  <button onclick="startRecognition()">🎤 Говорити</button>
+  <div id="result"></div>
+  <div id="basket">У кошику: 0</div>
+  <!-- SVG-кошик -->
+  <svg id="basketSVG" width="120" height="90" viewBox="0 0 64 48">
+    <ellipse cx="32" cy="40" rx="26" ry="6" fill="#c97e3d"/>
+    <rect x="10" y="18" width="44" height="20" rx="7" fill="#f9cf93" stroke="#c97e3d" stroke-width="2"/>
+    <rect x="12" y="22" width="40" height="12" rx="6" fill="#e0a96d"/>
+    <ellipse cx="32" cy="38" rx="20" ry="5" fill="#c97e3d"/>
+    <path d="M16 18 Q32 -2 48 18" fill="none" stroke="#ba8036" stroke-width="4"/>
+  </svg>
+
+  <audio id="correctSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+  <audio id="wrongSound" src="https://www.soundjay.com/button/sounds/beep-10.mp3"></audio>
+  <audio id="backgroundMusic" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12e1b36662.mp3" loop></audio>
+
+  <script>
+    const fruits = [
+      { name: "яблуко", img: "https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg" },
+      { name: "банан", img: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg" },
+      { name: "груша", img: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f350.png" },
+      { name: "апельсин", img: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Orange-Fruit-Pieces.jpg" },
+      { name: "персик", img: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Nectarine_and_cross_section02_edit.jpg" },
+      { name: "слива", img: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Plums.jpg" },
+      { name: "вишня", img: "https://upload.wikimedia.org/wikipedia/commons/b/bb/Cherry_Stella444.jpg" },
+      { name: "полуниця", img: "https://upload.wikimedia.org/wikipedia/commons/2/29/PerfectStrawberry.jpg" },
+      { name: "виноград", img: "https://upload.wikimedia.org/wikipedia/commons/b/bb/Table_grapes_on_white.jpg" },
+      { name: "ківі", img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Kiwi_aka.jpg" },
+      { name: "ананас", img: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Pineapple_and_cross_section.jpg" },
+      { name: "морква", img: "https://upload.wikimedia.org/wikipedia/commons/4/40/Carrot.jpg" },
+      { name: "огірок", img: "https://upload.wikimedia.org/wikipedia/commons/5/57/Cucumber_on_white.jpg" },
+      { name: "помідор", img: "https://upload.wikimedia.org/wikipedia/commons/8/89/Tomato_je.jpg" },
+      { name: "капуста", img: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Cabbage_and_cross_section.jpg" },
+      { name: "буряк", img: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Beetrootj.jpg" },
+      { name: "кабачок", img: "https://upload.wikimedia.org/wikipedia/commons/6/63/Courgette.jpg" },
+      { name: "баклажан", img: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Eggplant.jpg" },
+      { name: "картопля", img: "https://upload.wikimedia.org/wikipedia/commons/6/60/Patates.jpg" },
+      { name: "цибуля", img: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Onion_on_White.JPG" },
+      { name: "перець", img: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Bell_pepper.jpg" }
+    ];
+
+    let currentIndex = 0;
+    let basketCount = 0;
+    let startedMusic = false;
+
+    const fruitImage = document.getElementById("fruitImage");
+    const resultDiv = document.getElementById("result");
+    const basketDiv = document.getElementById("basket");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    const basketSVG = document.getElementById("basketSVG");
+
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "uk-UA";
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showFruit() {
+      const fruit = fruits[currentIndex];
+      fruitImage.src = fruit.img;
+      speak("Що це за фрукт або овоч?");
+    }
+
+    function animateBasket() {
+      basketSVG.style.transform = "scale(1.2) rotate(-8deg)";
+      setTimeout(() => {
+        basketSVG.style.transform = "scale(1.0) rotate(0deg)";
+      }, 350);
+    }
+
+    function startRecognition() {
+      if (!startedMusic) {
+        backgroundMusic.play();
+        startedMusic = true;
+      }
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "uk-UA";
+      recognition.interimResults = false;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+        const expected = fruits[currentIndex].name;
+
+        if (transcript === expected) {
+          resultDiv.innerHTML = `<span style='color:green;font-weight:bold;'>✅ Правильно! Це ${expected}</span>`;
+          correctSound.play();
+          basketCount++;
+          basketDiv.innerHTML = `У кошику: <span style='color:#006400;'>${basketCount}</span>`;
+          animateBasket();
+          currentIndex = (currentIndex + 1) % fruits.length;
+          setTimeout(() => {
+            resultDiv.innerText = "";
+            showFruit();
+          }, 1800);
+        } else {
+          resultDiv.innerHTML = `<span style='color:#d32f2f;font-weight:bold;'>❌ Невірно. Спробуй ще раз!</span>`;
+          wrongSound.play();
+          speak("Спробуй ще раз. Що це?");
+        }
+      };
+
+      recognition.onerror = function(event) {
+        resultDiv.innerHTML = "<span style='color:#d32f2f;'>⚠️ Помилка розпізнавання. Спробуй ще раз.</span>";
+        speak("Помилка. Спробуй ще раз.");
+      };
+    }
+
+    // Новий код: запуск музики тільки після натискання “Старт”
+    document.getElementById("startButton").onclick = function() {
+      document.getElementById("startScreen").style.display = "none";
+      backgroundMusic.play();
+      startedMusic = true;
+      showFruit();
+    };
+
+    // showFruit() викликаємо тільки після старту (див. вище)
+  </script>
+</body>
+
+</html>
